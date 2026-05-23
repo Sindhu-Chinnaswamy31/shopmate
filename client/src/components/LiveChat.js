@@ -37,7 +37,7 @@ function LiveChat() {
     return () => {
       if (socket) socket.disconnect();
     };
-  }, [SOCKET_URL]);
+  }, [SOCKET_URL, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

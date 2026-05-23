@@ -74,7 +74,7 @@ function SupportChat() {
     return () => {
       if (socket) socket.disconnect();
     };
-  }, [SOCKET_URL, navigate]);
+  }, [SOCKET_URL, navigate, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -98,7 +98,7 @@ function AdminPanel() {
       navigate("/");
       toast.error("Access denied!");
     }
-  }, [user]);
+  }, [navigate, user]);
 
   useEffect(() => {
     loadDashboard();
