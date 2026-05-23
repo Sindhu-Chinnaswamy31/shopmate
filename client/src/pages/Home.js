@@ -4,6 +4,8 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import toast from "react-hot-toast";
+import StarRating from "../components/StarRating";
+
 function Home() {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -32,7 +34,6 @@ function Home() {
       });
   }, []);
 
-  // Search + Filter logic
   useEffect(() => {
     let result = products;
     if (activeCategory !== "All") {
@@ -64,7 +65,6 @@ function Home() {
           <p className="text-purple-200 text-lg mb-8">
             Discover amazing products at unbeatable prices
           </p>
-          {/* Search Bar */}
           <div className="flex items-center bg-white rounded-full overflow-hidden shadow-lg max-w-xl mx-auto">
             <input
               type="text"
@@ -136,7 +136,6 @@ function Home() {
   );
 }
 
-// Product Card Component
 function ProductCard({ product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const cartItem = cartItems.find((item) => item._id === product._id);
@@ -147,7 +146,6 @@ function ProductCard({ product }) {
 
   return (
     <div className="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      {/* CLICKABLE AREA — image + name + description */}
       <div
         onClick={() => navigate(`/product/${product._id}`)}
         className="cursor-pointer"
@@ -171,17 +169,23 @@ function ProductCard({ product }) {
               );
             }}
             className={`absolute top-2 right-2 rounded-full p-1.5 shadow hover:scale-110 transition text-4xl
-    ${wishlisted ? "text-red-500" : "text-gray-300"}`}
+              ${wishlisted ? "text-red-500" : "text-gray-300"}`}
           >
-            {" "}
-            ♥{" "}
+            ♥
           </button>
         </div>
         <div className="px-4 pt-3">
           <span className="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full font-medium">
             {product.category}
           </span>
-          <h3 className="font-semibold text-gray-800 mt-2 text-base leading-snug hover:text-purple-600 transition">
+          {/* ⭐ Star Rating */}
+          <div className="flex items-center gap-1 mt-1">
+            <StarRating rating={product.rating || 0} size="sm" />
+            <span className="text-xs text-gray-400">
+              ({product.numReviews || 0})
+            </span>
+          </div>
+          <h3 className="font-semibold text-gray-800 mt-1 text-base leading-snug hover:text-purple-600 transition">
             {product.name}
           </h3>
           <p className="text-gray-400 text-sm mt-1 line-clamp-2">
@@ -190,9 +194,8 @@ function ProductCard({ product }) {
         </div>
       </div>
 
-      {/* NON-CLICKABLE AREA — price + cart controls */}
       <div className="p-4">
-        <div className="flex justify-between items-center mt-3">
+        <div className="flex justify-between items-center mt-1">
           <p className="text-purple-600 font-bold text-xl">₹{product.price}</p>
           <p
             className={`text-xs font-medium ${
@@ -205,15 +208,15 @@ function ProductCard({ product }) {
         {quantity === 0 ? (
           <button
             onClick={() => product.stock > 0 && addToCart(product)}
-            disabled={product.stock === 0}
+            disabled={product.stock <= 0}
             className={`mt-4 w-full py-2 rounded-xl font-semibold transition-all duration-300
-      ${
-        product.stock === 0
-          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-          : "bg-purple-600 text-white hover:bg-purple-700"
-      }`}
+              ${
+                product.stock <= 0
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-purple-600 text-white hover:bg-purple-700"
+              }`}
           >
-            {product.stock === 0 ? "❌ Out of Stock" : "Add to Cart"}
+            {product.stock <= 0 ? "❌ Out of Stock" : "Add to Cart"}
           </button>
         ) : (
           <div className="mt-4 flex items-center justify-between bg-purple-50 rounded-xl px-3 py-2">
@@ -239,11 +242,11 @@ function ProductCard({ product }) {
               }
               disabled={quantity >= product.stock}
               className={`w-8 h-8 rounded-full font-bold transition flex items-center justify-center
-        ${
-          quantity >= product.stock
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-purple-600 text-white hover:bg-purple-700"
-        }`}
+                ${
+                  quantity >= product.stock
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-purple-600 text-white hover:bg-purple-700"
+                }`}
             >
               +
             </button>
