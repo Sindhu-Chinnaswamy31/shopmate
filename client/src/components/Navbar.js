@@ -48,12 +48,16 @@ function Navbar() {
 
           {user?.role === "admin" && (
             <div className="flex items-center gap-2">
-              <Link to="/support"
-                className="text-gray-600 hover:text-purple-600 transition text-sm font-medium">
+              <Link
+                to="/support"
+                className="text-gray-600 hover:text-purple-600 transition text-sm font-medium"
+              >
                 💬 Support
               </Link>
-              <Link to="/admin"
-                className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-yellow-600 transition">
+              <Link
+                to="/admin"
+                className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-yellow-600 transition"
+              >
                 👑 Admin
               </Link>
             </div>
@@ -69,14 +73,17 @@ function Navbar() {
                   My Orders
                 </Link>
               )}
-              <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-full">
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-full hover:bg-purple-100 transition"
+              >
                 <div className="w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
                   {user.name?.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-gray-700 font-medium text-sm hidden sm:block">
                   {user.name}
                 </span>
-              </div>
+              </Link>
               {user?.role !== "admin" && (
                 <Link
                   to="/wishlist"

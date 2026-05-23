@@ -12,6 +12,7 @@ import Wishlist from "./pages/Wishlist";
 import AdminPanel from "./pages/AdminPanel";
 import MyOrders from "./pages/MyOrders";
 import SupportChat from "./pages/SupportChat";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
           element={
             <ProtectedRoute>
               <SupportChat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

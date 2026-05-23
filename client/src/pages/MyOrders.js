@@ -139,16 +139,29 @@ function MyOrders() {
                 <span>💳</span>
                 <span>Paid via Razorpay</span>
               </div>
-              {order.status === "delivered" && (
-                <button className="text-purple-600 text-sm font-semibold hover:underline">
-                  Write a Review
-                </button>
-              )}
-              {order.status === "paid" && (
-                <span className="text-sm text-green-600 font-medium">
-                  🚚 Will be shipped soon
-                </span>
-              )}
+              <div className="flex gap-3">
+                {order.status === "delivered" && (
+                  <span className="text-sm text-blue-600 font-medium">
+                    ✅ Delivered
+                  </span>
+                )}
+                {(order.status === "paid" ||
+                  order.status === "delivered" ||
+                  order.status === "shipped") && (
+                  <button
+                    onClick={() => {
+                      // Go to first product in order to review
+                      const firstItem = order.items[0];
+                      if (firstItem?.product) {
+                        window.location.href = `/product/${firstItem.product}`;
+                      }
+                    }}
+                    className="text-sm bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700 transition"
+                  >
+                    ✍️ Write Review
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}

@@ -30,5 +30,7 @@ export const adminGetUsers = () => API.get('/admin/users');
 export const getReviews = (productId) => API.get(`/reviews/${productId}`);
 export const addReview = (productId, data) => API.post(`/reviews/${productId}`, data);
 export const deleteReview = (reviewId) => API.delete(`/reviews/${reviewId}`);
+export const getProfile = () => API.get('/auth/profile');
+export const updateProfile = (data) => API.put('/auth/profile', data);
 
 export default API;
