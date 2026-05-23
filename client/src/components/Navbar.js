@@ -8,7 +8,6 @@ function Navbar() {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
   const { wishlist } = useWishlist();
 
   const handleLogout = () => {

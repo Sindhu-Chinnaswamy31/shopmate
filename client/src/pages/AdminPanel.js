@@ -102,7 +102,7 @@ function AdminPanel() {
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+  }, [navigate]);
 
   const loadDashboard = async () => {
     try {

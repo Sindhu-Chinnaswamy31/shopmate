@@ -1,62 +1,63 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect, useRef } from "react";
+import { io } from "socket.io-client";
+import { useAuth } from "../context/AuthContext";
 
 let socket;
 
 function LiveChat() {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [connected, setConnected] = useState(false);
   const messagesEndRef = useRef(null);
-  const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8000';
-  
+  const SOCKET_URL =
+    process.env.REACT_APP_SOCKET_URL || "http://localhost:8000";
+
   useEffect(() => {
     if (!user) return;
 
     socket = io(SOCKET_URL);
 
-    socket.on('connect', () => {
+    socket.on("connect", () => {
       setConnected(true);
       // Join private room
-      socket.emit('customer_join', {
+      socket.emit("customer_join", {
         userId: user.id,
         userName: user.name,
-        role: user.role
+        role: user.role,
       });
     });
 
     // Receive messages (from admin or own)
-    socket.on('new_message', (msg) => {
-      setMessages(prev => [...prev, msg]);
+    socket.on("new_message", (msg) => {
+      setMessages((prev) => [...prev, msg]);
     });
 
     return () => {
       if (socket) socket.disconnect();
     };
-  }, [user]);
+  }, [SOCKET_URL]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const sendMessage = () => {
     if (!message.trim() || !user) return;
-    socket.emit('customer_message', {
+    socket.emit("customer_message", {
       roomId: `room_${user.id}`,
       userName: user.name,
-      text: message
+      text: message,
     });
-    setMessage('');
+    setMessage("");
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === "Enter") sendMessage();
   };
 
-  if (!user || user.role === 'admin') return null;
+  if (!user || user.role === "admin") return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -67,11 +68,15 @@ function LiveChat() {
             <div>
               <p className="font-bold">💬 Support Chat</p>
               <p className="text-xs text-purple-200">
-                {connected ? '🟢 Online' : '🔴 Connecting...'}
+                {connected ? "🟢 Online" : "🔴 Connecting..."}
               </p>
             </div>
-            <button onClick={() => setIsOpen(false)}
-              className="text-white hover:text-gray-200 text-xl">✕</button>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-white hover:text-gray-200 text-xl"
+            >
+              ✕
+            </button>
           </div>
 
           {/* Messages */}
@@ -86,18 +91,25 @@ function LiveChat() {
               </div>
             )}
             {messages.map((msg, index) => {
-              const isMe = msg.sender === 'customer';
+              const isMe = msg.sender === "customer";
               return (
-                <div key={index}
-                  className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                <div
+                  key={index}
+                  className={`flex flex-col ${
+                    isMe ? "items-end" : "items-start"
+                  }`}
+                >
                   <span className="text-xs text-gray-400 mb-1">
-                    {isMe ? 'You' : '🛡️ Support'} · {msg.time}
+                    {isMe ? "You" : "🛡️ Support"} · {msg.time}
                   </span>
-                  <div className={`px-3 py-2 rounded-2xl max-w-xs text-sm
-                    ${isMe
-                      ? 'bg-purple-600 text-white rounded-br-none'
-                      : 'bg-gray-100 text-gray-800 rounded-bl-none'
-                    }`}>
+                  <div
+                    className={`px-3 py-2 rounded-2xl max-w-xs text-sm
+                    ${
+                      isMe
+                        ? "bg-purple-600 text-white rounded-br-none"
+                        : "bg-gray-100 text-gray-800 rounded-bl-none"
+                    }`}
+                  >
                     {msg.text}
                   </div>
                 </div>
@@ -117,9 +129,11 @@ function LiveChat() {
               className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm
                 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
-            <button onClick={sendMessage}
+            <button
+              onClick={sendMessage}
               className="bg-purple-600 text-white rounded-full w-10 h-10
-                flex items-center justify-center hover:bg-purple-700 transition">
+                flex items-center justify-center hover:bg-purple-700 transition"
+            >
               ➤
             </button>
           </div>
@@ -130,8 +144,9 @@ function LiveChat() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-purple-600 text-white rounded-full w-14 h-14 flex items-center
-          justify-center shadow-lg hover:bg-purple-700 transition text-2xl">
-        {isOpen ? '✕' : '💬'}
+          justify-center shadow-lg hover:bg-purple-700 transition text-2xl"
+      >
+        {isOpen ? "✕" : "💬"}
       </button>
     </div>
   );
