@@ -15,10 +15,85 @@ router.get("/dashboard", async (req, res) => {
     const totalProducts = await Product.countDocuments();
     const totalOrders = await Order.countDocuments();
     const totalUsers = await User.countDocuments();
-    const orders = await Order.find({ status: "paid" });
-    const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const orders = await Order.find().sort({ createdAt: 1 });
+    const paidOrders = orders.filter(
+      (o) => o.status !== "pending" && o.status !== "failed"
+    );
+    const totalRevenue = paidOrders.reduce((sum, o) => sum + o.totalAmount, 0);
 
-    res.json({ totalProducts, totalOrders, totalUsers, totalRevenue });
+    // Orders by status
+    const ordersByStatus = {
+      pending: orders.filter((o) => o.status === "pending").length,
+      paid: orders.filter((o) => o.status === "paid").length,
+      shipped: orders.filter((o) => o.status === "shipped").length,
+      delivered: orders.filter((o) => o.status === "delivered").length,
+      failed: orders.filter((o) => o.status === "failed").length,
+    };
+
+    // Revenue by month (last 6 months)
+    const revenueByMonth = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const month = date.toLocaleString("default", { month: "short" });
+      const year = date.getFullYear();
+      const monthOrders = paidOrders.filter((o) => {
+        const orderDate = new Date(o.createdAt);
+        return (
+          orderDate.getMonth() === date.getMonth() &&
+          orderDate.getFullYear() === year
+        );
+      });
+      const revenue = monthOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+      revenueByMonth.push({
+        month: `${month} ${year}`,
+        revenue,
+        orders: monthOrders.length,
+      });
+    }
+
+    // Top 5 products by sales
+    const allItems = orders.flatMap((o) => o.items);
+    const productSales = {};
+    allItems.forEach((item) => {
+      if (productSales[item.name]) {
+        productSales[item.name] += item.quantity;
+      } else {
+        productSales[item.name] = item.quantity;
+      }
+    });
+    const topProducts = Object.entries(productSales)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, sales]) => ({ name: name.substring(0, 15), sales }));
+
+    // New users by month
+    const users = await User.find().sort({ createdAt: 1 });
+    const usersByMonth = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const month = date.toLocaleString("default", { month: "short" });
+      const monthUsers = users.filter((u) => {
+        const userDate = new Date(u.createdAt);
+        return (
+          userDate.getMonth() === date.getMonth() &&
+          userDate.getFullYear() === date.getFullYear()
+        );
+      });
+      usersByMonth.push({ month, users: monthUsers.length });
+    }
+
+    res.json({
+      totalProducts,
+      totalOrders,
+      totalUsers,
+      totalRevenue,
+      ordersByStatus,
+      revenueByMonth,
+      topProducts,
+      usersByMonth,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
