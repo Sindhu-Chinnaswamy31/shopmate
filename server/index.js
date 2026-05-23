@@ -14,7 +14,6 @@ const io = new Server(server, {
       'http://localhost:3002',
       'https://shopmate-snowy.vercel.app' // ← add your Vercel URL later
     ],
-    credentials: true,
     methods: ["GET", "POST"],
   },
 });
