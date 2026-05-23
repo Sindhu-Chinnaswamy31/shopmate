@@ -15,13 +15,15 @@ function SupportChat() {
   const [notifications, setNotifications] = useState({});
   const messagesEndRef = useRef(null);
 
+  const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8000';
+
   useEffect(() => {
     if (!user || user.role !== "admin") {
       navigate("/");
       return;
     }
 
-    socket = io("http://localhost:8000");
+    socket = io(SOCKET_URL);
 
     socket.on("connect", () => {
       socket.emit("admin_join", { name: user.name });

@@ -11,11 +11,12 @@ function LiveChat() {
   const [messages, setMessages] = useState([]);
   const [connected, setConnected] = useState(false);
   const messagesEndRef = useRef(null);
-
+  const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8000';
+  
   useEffect(() => {
     if (!user) return;
 
-    socket = io('http://localhost:8000');
+    socket = io(SOCKET_URL);
 
     socket.on('connect', () => {
       setConnected(true);
