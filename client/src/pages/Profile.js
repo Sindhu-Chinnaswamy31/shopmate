@@ -29,7 +29,7 @@ function Profile() {
         setLoading(false);
       })
       .catch(err => { console.error(err); setLoading(false); });
-  }, [user]);
+  }, [navigate, user]);
 
   const handleUpdateName = async (e) => {
     e.preventDefault();
