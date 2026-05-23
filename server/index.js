@@ -10,10 +10,11 @@ const server = http.createServer(app); // wrap express with http
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:3002',
-      'https://shopmate-snowy.vercel.app' // ← add your Vercel URL later
-    ],
+    // origin: [
+    //   'http://localhost:3002',
+    //   'https://shopmate-snowy.vercel.app' // ← add your Vercel URL later
+    // ],
+    origin: '*',
     methods: ["GET", "POST"],
   },
 });
