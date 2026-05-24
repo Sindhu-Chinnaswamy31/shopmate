@@ -35,8 +35,8 @@ function ProductForm({
   errors = {},
 }) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl max-h-screen overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-screen overflow-y-auto">
         <h3 className="text-xl font-bold mb-6">{title}</h3>
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           {["name", "description", "price", "category", "stock", "image"].map(
@@ -129,12 +129,10 @@ function AdminPanel() {
     const res = await adminGetProducts();
     setProducts(res.data);
   };
-
   const loadOrders = async () => {
     const res = await adminGetOrders();
     setOrders(res.data);
   };
-
   const loadUsers = async () => {
     const res = await adminGetUsers();
     setUsers(res.data);
@@ -142,15 +140,15 @@ function AdminPanel() {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setSidebarOpen(false);
     if (tab === "support") navigate("/support");
     if (tab === "products") loadProducts();
     if (tab === "orders") loadOrders();
     if (tab === "users") loadUsers();
   };
 
-  const handleFormChange = (e) => {
+  const handleFormChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const validateProduct = (form) => {
     const errors = {};
@@ -262,19 +260,23 @@ function AdminPanel() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 relative">
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
-  md:translate-x-0 fixed md:relative z-40 w-64 bg-gray-900 text-white 
-  flex flex-col transition-transform duration-300 h-full min-h-screen`}
+        className={`fixed md:relative z-40 w-64 bg-gray-900 text-white flex flex-col
+        min-h-screen transition-transform duration-300
+        ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
       >
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-bold text-purple-400">👑 Admin Panel</h2>
           <p className="text-gray-400 text-sm mt-1">{user?.name}</p>
@@ -313,22 +315,22 @@ function AdminPanel() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 p-4 sm:p-8 overflow-auto min-w-0">
+        {/* Mobile Menu Button */}
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="md:hidden mb-4 bg-gray-900 text-white px-4 py-2 rounded-xl flex items-center gap-2"
+          onClick={() => setSidebarOpen(true)}
+          className="md:hidden mb-4 flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-medium"
         >
           ☰ Menu
         </button>
+
         {/* ── DASHBOARD ── */}
         {activeTab === "dashboard" && dashboard && (
           <div>
             <h1 className="text-2xl font-bold text-gray-800 mb-6">
               Dashboard 📊
             </h1>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
               {[
                 {
                   label: "Total Products",
@@ -361,24 +363,24 @@ function AdminPanel() {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className={`${stat.bg} rounded-2xl p-6 border border-gray-100`}
+                  className={`${stat.bg} rounded-2xl p-4 sm:p-6 border border-gray-100`}
                 >
                   <div
-                    className={`${stat.color} w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4`}
+                    className={`${stat.color} w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4`}
                   >
                     {stat.icon}
                   </div>
-                  <p className="text-gray-500 text-sm">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-800 mt-1">
+                  <p className="text-gray-500 text-xs sm:text-sm">
+                    {stat.label}
+                  </p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-800 mt-1">
                     {stat.value}
                   </p>
                 </div>
               ))}
             </div>
 
-            {/* Charts Row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Revenue Chart */}
               <div className="bg-white rounded-2xl shadow p-6">
                 <h3 className="font-bold text-gray-800 mb-4">
                   📈 Revenue (Last 6 Months)
@@ -408,7 +410,6 @@ function AdminPanel() {
                 </ResponsiveContainer>
               </div>
 
-              {/* Orders Pie Chart */}
               <div className="bg-white rounded-2xl shadow p-6">
                 <h3 className="font-bold text-gray-800 mb-4">
                   🥧 Orders by Status
@@ -455,9 +456,7 @@ function AdminPanel() {
               </div>
             </div>
 
-            {/* Charts Row 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Top Products */}
               <div className="bg-white rounded-2xl shadow p-6">
                 <h3 className="font-bold text-gray-800 mb-4">
                   🏆 Top Selling Products
@@ -489,7 +488,6 @@ function AdminPanel() {
                 )}
               </div>
 
-              {/* New Users */}
               <div className="bg-white rounded-2xl shadow p-6">
                 <h3 className="font-bold text-gray-800 mb-4">
                   👥 New Users (Last 6 Months)
@@ -512,7 +510,9 @@ function AdminPanel() {
         {activeTab === "products" && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-800">Products 📦</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+                Products 📦
+              </h1>
               <button
                 onClick={() => {
                   setShowAddProduct(true);
@@ -525,13 +525,13 @@ function AdminPanel() {
                     image: "",
                   });
                 }}
-                className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition font-semibold"
+                className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-xl hover:bg-purple-700 transition font-semibold text-sm sm:text-base"
               >
                 + Add Product
               </button>
             </div>
-            <div className="bg-white rounded-2xl shadow overflow-hidden">
-              <table className="w-full">
+            <div className="bg-white rounded-2xl shadow overflow-x-auto">
+              <table className="w-full min-w-[600px]">
                 <thead className="bg-gray-50">
                   <tr>
                     {[
@@ -624,9 +624,11 @@ function AdminPanel() {
         {/* ── ORDERS ── */}
         {activeTab === "orders" && (
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Orders 🧾</h1>
-            <div className="bg-white rounded-2xl shadow overflow-hidden">
-              <table className="w-full">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
+              Orders 🧾
+            </h1>
+            <div className="bg-white rounded-2xl shadow overflow-x-auto">
+              <table className="w-full min-w-[600px]">
                 <thead className="bg-gray-50">
                   <tr>
                     {[
@@ -708,9 +710,11 @@ function AdminPanel() {
         {/* ── USERS ── */}
         {activeTab === "users" && (
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Users 👥</h1>
-            <div className="bg-white rounded-2xl shadow overflow-hidden">
-              <table className="w-full">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
+              Users 👥
+            </h1>
+            <div className="bg-white rounded-2xl shadow overflow-x-auto">
+              <table className="w-full min-w-[400px]">
                 <thead className="bg-gray-50">
                   <tr>
                     {["Name", "Email", "Role", "Joined"].map((h) => (
