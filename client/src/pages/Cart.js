@@ -1,16 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { createPaymentOrder, verifyPayment } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { applyCoupon } from "../services/api";
 
 function Cart() {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } =
     useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   if (cartItems.length === 0)
     return (
@@ -33,13 +37,14 @@ function Cart() {
 
     try {
       const { data } = await createPaymentOrder({
-        totalAmount: totalPrice,
+        totalAmount: appliedCoupon ? appliedCoupon.finalAmount : totalPrice,
         items: cartItems.map((item) => ({
           product: item._id,
           name: item.name,
           price: item.price,
           quantity: item.quantity,
         })),
+        couponCode: appliedCoupon?.couponCode || null,
       });
 
       const options = {
@@ -78,6 +83,32 @@ function Cart() {
     } catch (err) {
       toast.error("Something went wrong. Please try again.");
     }
+  };
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Enter a coupon code");
+      return;
+    }
+    setCouponLoading(true);
+    try {
+      const res = await applyCoupon({
+        code: couponCode,
+        totalAmount: totalPrice,
+      });
+      setAppliedCoupon(res.data);
+      toast.success(res.data.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Invalid coupon");
+      setAppliedCoupon(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    toast.success("Coupon removed");
   };
 
   return (
@@ -144,18 +175,72 @@ function Cart() {
         ))}
       </div>
 
+      {/* Coupon Section */}
+      <div className="mt-6 bg-white rounded-xl shadow p-4">
+        <p className="font-semibold text-gray-800 mb-3">🏷️ Have a coupon?</p>
+        {appliedCoupon ? (
+          <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <div>
+              <p className="font-bold text-green-700">
+                {appliedCoupon.couponCode} applied! ✅
+              </p>
+              <p className="text-sm text-green-600">
+                You save ₹{appliedCoupon.discount}
+              </p>
+            </div>
+            <button
+              onClick={handleRemoveCoupon}
+              className="text-red-500 hover:text-red-700 text-sm font-medium"
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              placeholder="Enter coupon code"
+              className="flex-1 border border-gray-300 rounded-xl px-4 py-2
+          focus:outline-none focus:ring-2 focus:ring-purple-400 uppercase"
+            />
+            <button
+              onClick={handleApplyCoupon}
+              disabled={couponLoading}
+              className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700
+          transition font-semibold disabled:opacity-60"
+            >
+              {couponLoading ? "..." : "Apply"}
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Total & Checkout */}
-      <div className="mt-8 bg-white rounded-xl shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-xl font-semibold">Total:</span>
+      <div className="mt-4 bg-white rounded-xl shadow p-6">
+        {appliedCoupon && (
+          <div className="flex justify-between items-center mb-2 text-gray-500">
+            <span>Subtotal</span>
+            <span>₹{totalPrice}</span>
+          </div>
+        )}
+        {appliedCoupon && (
+          <div className="flex justify-between items-center mb-2 text-green-600 font-medium">
+            <span>Discount ({appliedCoupon.couponCode})</span>
+            <span>- ₹{appliedCoupon.discount}</span>
+          </div>
+        )}
+        <div className="flex justify-between items-center mb-4 border-t pt-3">
+          <span className="text-xl font-semibold">Total</span>
           <span className="text-2xl font-bold text-purple-600">
-            ₹{totalPrice}
+            ₹{appliedCoupon ? appliedCoupon.finalAmount : totalPrice}
           </span>
         </div>
         <button
           onClick={handlePayment}
           className="w-full bg-purple-600 text-white py-3 rounded-xl
-                hover:bg-purple-700 transition font-semibold text-lg"
+      hover:bg-purple-700 transition font-semibold text-lg"
         >
           Proceed to Payment 💳
         </button>

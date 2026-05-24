@@ -19,6 +19,9 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "paid", "shipped", "delivered", "failed"],
       default: "pending",
     },
+    couponCode: { type: String, default: null },
+    discount: { type: Number, default: 0 },
+    originalAmount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

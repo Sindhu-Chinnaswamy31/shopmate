@@ -6,6 +6,7 @@ const Order = require("../models/Order");
 const { protect } = require("../middleware/authMiddleware");
 const { sendOrderConfirmation } = require("../utils/emailService");
 const User = require("../models/User");
+const Coupon = require('../models/Coupon');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -93,6 +94,48 @@ router.get("/my-orders", protect, async (req, res) => {
       createdAt: -1,
     });
     res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+//Coupon code
+router.post('/create-order', protect, async (req, res) => {
+  try {
+    const { totalAmount, items, couponCode } = req.body;
+
+    const options = {
+      amount: totalAmount * 100,
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`
+    };
+
+    const razorpayOrder = await razorpay.orders.create(options);
+
+    const order = new Order({
+      user: req.user.id,
+      items,
+      totalAmount,
+      couponCode: couponCode || null,
+      razorpayOrderId: razorpayOrder.id,
+      status: 'pending'
+    });
+    await order.save();
+
+    // Increment coupon usage
+    if (couponCode) {
+      await Coupon.findOneAndUpdate(
+        { code: couponCode.toUpperCase() },
+        { $inc: { usedCount: 1 } }
+      );
+    }
+
+    res.json({
+      orderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      dbOrderId: order._id
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

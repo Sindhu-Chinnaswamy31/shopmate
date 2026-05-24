@@ -32,5 +32,10 @@ export const addReview = (productId, data) => API.post(`/reviews/${productId}`, 
 export const deleteReview = (reviewId) => API.delete(`/reviews/${reviewId}`);
 export const getProfile = () => API.get('/auth/profile');
 export const updateProfile = (data) => API.put('/auth/profile', data);
+export const applyCoupon = (data) => API.post('/coupons/apply', data);
+export const adminGetCoupons = () => API.get('/coupons');
+export const adminCreateCoupon = (data) => API.post('/coupons', data);
+export const adminUpdateCoupon = (id, data) => API.put(`/coupons/${id}`, data);
+export const adminDeleteCoupon = (id) => API.delete(`/coupons/${id}`);
 
 export default API;
