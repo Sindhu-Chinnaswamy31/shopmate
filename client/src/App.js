@@ -13,6 +13,7 @@ import AdminPanel from "./pages/AdminPanel";
 import MyOrders from "./pages/MyOrders";
 import SupportChat from "./pages/SupportChat";
 import Profile from "./pages/Profile";
+import Addresses from './pages/Addresses';
 
 function App() {
   return (
@@ -68,6 +69,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/addresses"
+          element={
+            <ProtectedRoute>
+              <Addresses />
             </ProtectedRoute>
           }
         />

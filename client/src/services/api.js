@@ -37,5 +37,10 @@ export const adminGetCoupons = () => API.get('/coupons');
 export const adminCreateCoupon = (data) => API.post('/coupons', data);
 export const adminUpdateCoupon = (id, data) => API.put(`/coupons/${id}`, data);
 export const adminDeleteCoupon = (id) => API.delete(`/coupons/${id}`);
+export const getAddresses = () => API.get('/addresses');
+export const addAddress = (data) => API.post('/addresses', data);
+export const updateAddress = (id, data) => API.put(`/addresses/${id}`, data);
+export const deleteAddress = (id) => API.delete(`/addresses/${id}`);
+export const setDefaultAddress = (id) => API.put(`/addresses/${id}/default`);
 
 export default API;

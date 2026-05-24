@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -6,6 +6,7 @@ import { createPaymentOrder, verifyPayment } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { applyCoupon } from "../services/api";
+import { getAddresses } from "../services/api";
 
 function Cart() {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } =
@@ -15,6 +16,18 @@ function Cart() {
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      getAddresses().then((res) => {
+        setAddresses(res.data);
+        const def = res.data.find((a) => a.isDefault);
+        if (def) setSelectedAddress(def._id);
+      });
+    }
+  }, [user]);
 
   if (cartItems.length === 0)
     return (
@@ -32,6 +45,15 @@ function Cart() {
     if (!user) {
       toast.error("Please login to proceed with payment!");
       navigate("/login");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Please login!");
+      return;
+    }
+    if (addresses.length > 0 && !selectedAddress) {
+      toast.error("Please select a delivery address!");
       return;
     }
 
@@ -174,6 +196,67 @@ function Cart() {
           </div>
         ))}
       </div>
+
+      {/* Delivery Address */}
+      {addresses.length > 0 && (
+        <div className="bg-white rounded-xl shadow p-4 mb-4">
+          <div className="flex justify-between items-center mb-3">
+            <p className="font-semibold text-gray-800">📍 Delivery Address</p>
+            <Link
+              to="/addresses"
+              className="text-purple-600 text-sm hover:underline"
+            >
+              Manage
+            </Link>
+          </div>
+          <div className="flex flex-col gap-2">
+            {addresses.map((address) => (
+              <label
+                key={address._id}
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition
+            ${
+              selectedAddress === address._id
+                ? "border-purple-500 bg-purple-50"
+                : "border-gray-200 hover:border-purple-300"
+            }`}
+              >
+                <input
+                  type="radio"
+                  name="address"
+                  value={address._id}
+                  checked={selectedAddress === address._id}
+                  onChange={() => setSelectedAddress(address._id)}
+                  className="mt-1 accent-purple-600"
+                />
+                <div className="text-sm">
+                  <p className="font-semibold text-gray-800">
+                    {address.fullName}
+                  </p>
+                  <p className="text-gray-500">
+                    {address.addressLine1}, {address.city}, {address.state} -{" "}
+                    {address.pincode}
+                  </p>
+                  <p className="text-gray-500">📞 {address.phone}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {addresses.length === 0 && user && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+          <p className="text-yellow-700 text-sm font-medium">
+            ⚠️ Please add a delivery address before placing order
+          </p>
+          <Link
+            to="/addresses"
+            className="text-purple-600 text-sm font-semibold hover:underline mt-1 block"
+          >
+            + Add Address
+          </Link>
+        </div>
+      )}
 
       {/* Coupon Section */}
       <div className="mt-6 bg-white rounded-xl shadow p-4">

@@ -20,20 +20,27 @@ function Navbar() {
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-
         {/* Brand */}
-        <Link to="/" className="text-xl font-extrabold text-purple-600 tracking-tight">
+        <Link
+          to="/"
+          className="text-xl font-extrabold text-purple-600 tracking-tight"
+        >
           🛍️ ShopMate
         </Link>
 
         {/* Desktop Right Side */}
         <div className="hidden md:flex items-center gap-4">
           {user?.role !== "admin" && (
-            <Link to="/cart" className="relative p-2 hover:bg-purple-50 rounded-full transition">
+            <Link
+              to="/cart"
+              className="relative p-2 hover:bg-purple-50 rounded-full transition"
+            >
               <span className="text-2xl">🛒</span>
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white
-                  text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span
+                  className="absolute -top-1 -right-1 bg-red-500 text-white
+                  text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                >
                   {totalItems}
                 </span>
               )}
@@ -42,11 +49,16 @@ function Navbar() {
 
           {user?.role === "admin" && (
             <div className="flex items-center gap-2">
-              <Link to="/support" className="text-gray-600 hover:text-purple-600 text-sm font-medium transition">
+              <Link
+                to="/support"
+                className="text-gray-600 hover:text-purple-600 text-sm font-medium transition"
+              >
                 💬 Support
               </Link>
-              <Link to="/admin"
-                className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-yellow-600 transition">
+              <Link
+                to="/admin"
+                className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-yellow-600 transition"
+              >
                 👑 Admin
               </Link>
             </div>
@@ -56,39 +68,58 @@ function Navbar() {
             <div className="flex items-center gap-3">
               {user.role !== "admin" && (
                 <>
-                  <Link to="/orders" className="text-gray-600 hover:text-purple-600 transition text-sm font-medium">
+                  <Link
+                    to="/orders"
+                    className="text-gray-600 hover:text-purple-600 transition text-sm font-medium"
+                  >
                     My Orders
                   </Link>
-                  <Link to="/wishlist" className="relative p-2 hover:bg-purple-50 rounded-full transition">
+                  <Link
+                    to="/wishlist"
+                    className="relative p-2 hover:bg-purple-50 rounded-full transition"
+                  >
                     <span className="text-2xl">🩶</span>
                     {wishlist.length > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white
-                        text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      <span
+                        className="absolute -top-1 -right-1 bg-red-500 text-white
+                        text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                      >
                         {wishlist.length}
                       </span>
                     )}
                   </Link>
                 </>
               )}
-              <Link to="/profile"
-                className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-full hover:bg-purple-100 transition">
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-full hover:bg-purple-100 transition"
+              >
                 <div className="w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
                   {user.name?.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-gray-700 font-medium text-sm">{user.name}</span>
+                <span className="text-gray-700 font-medium text-sm">
+                  {user.name}
+                </span>
               </Link>
-              <button onClick={handleLogout}
-                className="text-sm text-red-500 hover:text-red-700 font-medium transition">
+              <button
+                onClick={handleLogout}
+                className="text-sm text-red-500 hover:text-red-700 font-medium transition"
+              >
                 Logout
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link to="/login" className="text-gray-600 hover:text-purple-600 font-medium text-sm transition px-3 py-2">
+              <Link
+                to="/login"
+                className="text-gray-600 hover:text-purple-600 font-medium text-sm transition px-3 py-2"
+              >
                 Login
               </Link>
-              <Link to="/register"
-                className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition shadow">
+              <Link
+                to="/register"
+                className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-purple-700 transition shadow"
+              >
                 Get Started
               </Link>
             </div>
@@ -101,8 +132,10 @@ function Navbar() {
             <Link to="/cart" className="relative p-2">
               <span className="text-2xl">🛒</span>
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white
-                  text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span
+                  className="absolute -top-1 -right-1 bg-red-500 text-white
+                  text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                >
                   {totalItems}
                 </span>
               )}
@@ -110,10 +143,23 @@ function Navbar() {
           )}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition">
-            <div className={`w-6 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-            <div className={`w-6 h-0.5 bg-gray-700 my-1.5 transition-all ${menuOpen ? 'opacity-0' : ''}`} />
-            <div className={`w-6 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+            className="p-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            <div
+              className={`w-6 h-0.5 bg-gray-700 transition-all duration-300 ${
+                menuOpen ? "rotate-45 translate-y-1.5" : ""
+              }`}
+            />
+            <div
+              className={`w-6 h-0.5 bg-gray-700 my-1.5 transition-all ${
+                menuOpen ? "opacity-0" : ""
+              }`}
+            />
+            <div
+              className={`w-6 h-0.5 bg-gray-700 transition-all duration-300 ${
+                menuOpen ? "-rotate-45 -translate-y-1.5" : ""
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -135,47 +181,77 @@ function Navbar() {
 
               {user.role !== "admin" && (
                 <>
-                  <Link to="/orders" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition">
+                  <Link
+                    to="/orders"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition"
+                  >
                     📦 My Orders
                   </Link>
-                  <Link to="/wishlist" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition">
+                  <Link
+                    to="/wishlist"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition"
+                  >
                     ❤️ Wishlist {wishlist.length > 0 && `(${wishlist.length})`}
                   </Link>
-                  <Link to="/profile" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition">
+                  <Link
+                    to="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition"
+                  >
                     👤 My Profile
+                  </Link>
+                  <Link
+                    to="/addresses"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition"
+                  >
+                    📍 My Addresses
                   </Link>
                 </>
               )}
 
               {user.role === "admin" && (
                 <>
-                  <Link to="/admin" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition">
+                  <Link
+                    to="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition"
+                  >
                     👑 Admin Panel
                   </Link>
-                  <Link to="/support" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition">
+                  <Link
+                    to="/support"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 py-2 text-gray-700 hover:text-purple-600 transition"
+                  >
                     💬 Support Chat
                   </Link>
                 </>
               )}
 
-              <button onClick={handleLogout}
-                className="flex items-center gap-3 py-2 text-red-500 hover:text-red-700 transition">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 py-2 text-red-500 hover:text-red-700 transition"
+              >
                 🚪 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setMenuOpen(false)}
-                className="py-2 text-gray-700 hover:text-purple-600 transition font-medium">
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="py-2 text-gray-700 hover:text-purple-600 transition font-medium"
+              >
                 Login
               </Link>
-              <Link to="/register" onClick={() => setMenuOpen(false)}
-                className="bg-purple-600 text-white py-3 rounded-xl text-center font-semibold hover:bg-purple-700 transition">
+              <Link
+                to="/register"
+                onClick={() => setMenuOpen(false)}
+                className="bg-purple-600 text-white py-3 rounded-xl text-center font-semibold hover:bg-purple-700 transition"
+              >
                 Get Started
               </Link>
             </>
