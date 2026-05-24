@@ -21,23 +21,34 @@ function LiveChat() {
 
     socket.on("connect", () => {
       setConnected(true);
-      // Join private room
       socket.emit("customer_join", {
         userId: user.id,
         userName: user.name,
         role: user.role,
       });
+
+      // ← Load previous messages
+      socket.emit("get_my_messages", user.id);
     });
 
-    // Receive messages (from admin or own)
+    // Load previous messages
+    socket.on("my_messages", (previousMessages) => {
+      setMessages(previousMessages);
+    });
+
     socket.on("new_message", (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        // Avoid duplicates
+        const exists = prev.find((m) => m.id === msg.id);
+        if (exists) return prev;
+        return [...prev, msg];
+      });
     });
 
     return () => {
       if (socket) socket.disconnect();
     };
-  }, [SOCKET_URL, user]);
+  }, [SOCKET_URL,user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

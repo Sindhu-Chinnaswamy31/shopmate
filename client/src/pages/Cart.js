@@ -87,26 +87,45 @@ function Cart() {
         {cartItems.map((item) => (
           <div
             key={item._id}
-            className="bg-white rounded-xl shadow p-4 flex justify-between items-center"
+            className="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row justify-between gap-3"
           >
-            <div>
-              <h3 className="font-semibold text-lg">{item.name}</h3>
-              <p className="text-purple-600 font-bold">₹{item.price}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 bg-purple-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                ) : (
+                  "🛍️"
+                )}
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-800 text-sm sm:text-base">
+                  {item.name}
+                </h3>
+                <p className="text-purple-600 font-bold">₹{item.price}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between sm:gap-4">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                  className="bg-gray-200 px-3 py-1 rounded-lg hover:bg-gray-300 font-bold"
+                  onClick={() =>
+                    item.quantity === 1
+                      ? removeFromCart(item._id)
+                      : updateQuantity(item._id, item.quantity - 1)
+                  }
+                  className="bg-gray-200 w-8 h-8 rounded-full font-bold hover:bg-gray-300 flex items-center justify-center"
                 >
-                  -
+                  −
                 </button>
                 <span className="font-semibold w-6 text-center">
                   {item.quantity}
                 </span>
                 <button
                   onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                  className="bg-gray-200 px-3 py-1 rounded-lg hover:bg-gray-300 font-bold"
+                  className="bg-gray-200 w-8 h-8 rounded-full font-bold hover:bg-gray-300 flex items-center justify-center"
                 >
                   +
                 </button>

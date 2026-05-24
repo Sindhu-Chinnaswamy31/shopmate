@@ -95,7 +95,7 @@ function Profile() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6">
           {[
             { label: 'Total Orders', value: orders.length, icon: '📦' },
             { label: 'Wishlist Items', value: wishlist.length, icon: '❤️' },
@@ -111,7 +111,7 @@ function Profile() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         {['profile', 'password'].map(tab => (
           <button key={tab}
             onClick={() => setActiveTab(tab)}

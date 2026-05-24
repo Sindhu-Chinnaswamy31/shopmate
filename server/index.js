@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const http = require("http");
 const { Server } = require("socket.io");
 require("dotenv").config();
+const ChatRoom = require('./models/ChatRoom');
 
 const app = express();
 const server = http.createServer(app); // wrap express with http
@@ -57,107 +58,150 @@ const activeUsers = {};
 // Socket.io — Live Chat
 const rooms = {}; // track all customer rooms
 
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
 
-  // Customer joins their private room
-  socket.on("customer_join", (userData) => {
-    if (userData.role === "admin") return;
+  // Customer joins
+  socket.on('customer_join', async (userData) => {
+    if (userData.role === 'admin') return;
 
     const roomId = `room_${userData.userId}`;
     socket.join(roomId);
     socket.roomId = roomId;
     socket.userData = userData;
 
-    if (!rooms[roomId]) {
-      rooms[roomId] = {
-        roomId, // ← make sure roomId is stored
-        userId: userData.userId,
-        userName: userData.userName,
-        messages: [],
-      };
-    }
+    try {
+      // Find or create room in DB
+      let room = await ChatRoom.findOne({ userId: userData.userId });
+      if (!room) {
+        room = await ChatRoom.create({
+          userId: userData.userId,
+          userName: userData.userName,
+          roomId,
+          messages: []
+        });
+      } else {
+        // Update active status
+        await ChatRoom.findOneAndUpdate(
+          { userId: userData.userId },
+          { isActive: true }
+        );
+      }
 
-    socket.to("admin_room").emit("customer_connected", {
-      roomId,
-      userId: userData.userId,
-      userName: userData.userName,
-    });
+      // Notify admin
+      socket.to('admin_room').emit('customer_connected', {
+        roomId,
+        userId: userData.userId,
+        userName: userData.userName
+      });
+
+    } catch (err) {
+      console.error('customer_join error:', err);
+    }
   });
 
-  // Admin joins admin room
-  socket.on("admin_join", (adminData) => {
-    socket.join("admin_room");
+  // Admin joins
+  socket.on('admin_join', async (adminData) => {
+    socket.join('admin_room');
     socket.isAdmin = true;
-    socket.adminData = adminData;
-    console.log(`Admin ${adminData.name} joined`);
 
-    // Send all active rooms to admin
-    socket.emit("active_rooms", Object.values(rooms));
+    try {
+      // Send all active rooms from DB
+      const rooms = await ChatRoom.find({ isActive: true })
+        .select('userId userName roomId lastMessage lastMessageTime')
+        .sort({ lastMessageTime: -1 });
+      socket.emit('active_rooms', rooms);
+    } catch (err) {
+      console.error('admin_join error:', err);
+    }
   });
 
   // Customer sends message
-  socket.on("customer_message", (data) => {
+  socket.on('customer_message', async (data) => {
     const message = {
       id: Date.now(),
-      sender: "customer",
+      sender: 'customer',
       senderName: data.userName,
       text: data.text,
-      time: new Date().toLocaleTimeString(),
+      time: new Date().toLocaleTimeString()
     };
 
-    // Save to room history
-    if (rooms[data.roomId]) {
-      rooms[data.roomId].messages.push(message);
+    try {
+      // Save to DB
+      await ChatRoom.findOneAndUpdate(
+        { roomId: data.roomId },
+        {
+          $push: { messages: message },
+          lastMessage: data.text,
+          lastMessageTime: new Date()
+        }
+      );
+    } catch (err) {
+      console.error('customer_message error:', err);
     }
 
-    // Send to customer's room
-    io.to(data.roomId).emit("new_message", message);
-    // Send to admin
-    io.to("admin_room").emit("new_message_admin", {
+    io.to(data.roomId).emit('new_message', message);
+    io.to('admin_room').emit('new_message_admin', {
       roomId: data.roomId,
       userName: data.userName,
-      message,
+      message
     });
   });
 
-  // Admin sends message to specific customer
-  socket.on("admin_message", (data) => {
+  // Admin sends message
+  socket.on('admin_message', async (data) => {
     const message = {
       id: Date.now(),
-      sender: "admin",
-      senderName: "Support",
+      sender: 'admin',
+      senderName: 'Support',
       text: data.text,
-      time: new Date().toLocaleTimeString(),
+      time: new Date().toLocaleTimeString()
     };
 
-    // Save to room history
-    if (rooms[data.roomId]) {
-      rooms[data.roomId].messages.push(message);
+    try {
+      await ChatRoom.findOneAndUpdate(
+        { roomId: data.roomId },
+        {
+          $push: { messages: message },
+          lastMessage: `Support: ${data.text}`,
+          lastMessageTime: new Date()
+        }
+      );
+    } catch (err) {
+      console.error('admin_message error:', err);
     }
 
-    // Send to specific customer room
-    io.to(data.roomId).emit("new_message", message);
-    // Echo to admin
-    io.to("admin_room").emit("new_message_admin", {
+    io.to(data.roomId).emit('new_message', message);
+    io.to('admin_room').emit('new_message_admin', {
       roomId: data.roomId,
-      message,
+      message
     });
   });
 
-  // Admin requests chat history for a room
-  socket.on("get_room_messages", (roomId) => {
-    const messages = rooms[roomId]?.messages || [];
-    socket.emit("room_messages", { roomId, messages });
+  // Get room messages
+  socket.on('get_room_messages', async (roomId) => {
+    try {
+      const room = await ChatRoom.findOne({ roomId });
+      const messages = room ? room.messages : [];
+      socket.emit('room_messages', { roomId, messages });
+    } catch (err) {
+      socket.emit('room_messages', { roomId, messages: [] });
+    }
   });
 
-  socket.on("disconnect", () => {
-    if (socket.roomId && rooms[socket.roomId]) {
-      io.to("admin_room").emit("customer_disconnected", {
-        roomId: socket.roomId,
-      });
+  // Load previous messages for customer
+  socket.on('get_my_messages', async (userId) => {
+    try {
+      const room = await ChatRoom.findOne({ userId });
+      const messages = room ? room.messages : [];
+      socket.emit('my_messages', messages);
+    } catch (err) {
+      socket.emit('my_messages', []);
     }
-    console.log("User disconnected:", socket.id);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
   });
 });
 

@@ -198,7 +198,7 @@ function ProductDetail() {
 
       {/* ⭐ Reviews Section */}
       <div className="mt-10">
-        <div className="flex justify-between items-center mb-6">
+       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">Customer Reviews</h2>
             <div className="flex items-center gap-2 mt-1">
