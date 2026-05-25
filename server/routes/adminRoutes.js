@@ -6,6 +6,7 @@ const User = require("../models/User");
 const { protect } = require("../middleware/authMiddleware");
 const { adminOnly } = require("../middleware/adminMiddleware");
 const Notification = require('../models/Notification');
+const { sendOrderStatusUpdate } = require('../utils/emailService');
 
 // All admin routes are protected + admin only
 router.use(protect, adminOnly);
@@ -126,7 +127,7 @@ router.post("/products", async (req, res) => {
 router.put("/products/:id", async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
     });
     res.json(product);
   } catch (err) {
@@ -156,20 +157,6 @@ router.get("/orders", async (req, res) => {
   }
 });
 
-// Update order status
-router.put("/orders/:id", async (req, res) => {
-  try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
-    res.json(order);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
 // ── USERS ──────────────────────────────────
 router.get("/users", async (req, res) => {
   try {
@@ -182,28 +169,43 @@ router.get("/users", async (req, res) => {
 
 router.put('/orders/:id', async (req, res) => {
   try {
+    // ← Get order BEFORE updating to have user reference
+    const existingOrder = await Order.findById(req.params.id);
+
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
-    // Send notification to user
     const statusMessages = {
       shipped: { title: '🚚 Order Shipped!', msg: `Your order #${order._id.toString().slice(-6).toUpperCase()} has been shipped!` },
       delivered: { title: '📦 Order Delivered!', msg: `Your order #${order._id.toString().slice(-6).toUpperCase()} has been delivered!` },
-      paid: { title: '✅ Payment Confirmed!', msg: `Payment for order #${order._id.toString().slice(-6).toUpperCase()} confirmed!` },
+      paid: { title: '✅ Payment Confirmed!', msg: `Payment confirmed for order #${order._id.toString().slice(-6).toUpperCase()}!` },
       failed: { title: '❌ Order Failed', msg: `Your order #${order._id.toString().slice(-6).toUpperCase()} has failed.` },
     };
 
     if (statusMessages[req.body.status]) {
+      // Create in-app notification
       await Notification.create({
-        user: order.user,
+        user: existingOrder.user,
         title: statusMessages[req.body.status].title,
         message: statusMessages[req.body.status].msg,
         type: 'order',
         link: '/orders'
       });
+
+      // Send email
+      try {
+        const user = await User.findById(existingOrder.user);
+        console.log('Sending email to:', user?.email);
+        if (user && user.email) {
+          await sendOrderStatusUpdate(user.email, user.name, order, req.body.status);
+          console.log('Email sent successfully! ✅');
+        }
+      } catch (emailErr) {
+        console.error('Email sending failed:', emailErr.message);
+      }
     }
 
     res.json(order);

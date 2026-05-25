@@ -90,7 +90,8 @@ io.on('connection', (socket) => {
         // Update active status
         await ChatRoom.findOneAndUpdate(
           { userId: userData.userId },
-          { isActive: true }
+          { isActive: true },
+          { returnDocument: 'after' }
         );
       }
 
@@ -140,7 +141,8 @@ io.on('connection', (socket) => {
           $push: { messages: message },
           lastMessage: data.text,
           lastMessageTime: new Date()
-        }
+        },
+        { returnDocument: 'after' }
       );
     } catch (err) {
       console.error('customer_message error:', err);
@@ -171,7 +173,8 @@ io.on('connection', (socket) => {
           $push: { messages: message },
           lastMessage: `Support: ${data.text}`,
           lastMessageTime: new Date()
-        }
+        },
+        { returnDocument: 'after' }
       );
     } catch (err) {
       console.error('admin_message error:', err);

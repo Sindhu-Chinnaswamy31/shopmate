@@ -57,7 +57,7 @@ router.put('/:id', protect, async (req, res) => {
     const address = await Address.findOneAndUpdate(
       { _id: req.params.id, user: req.user.id },
       req.body,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!address) return res.status(404).json({ message: 'Address not found' });
     res.json(address);
@@ -96,7 +96,7 @@ router.put('/:id/default', protect, async (req, res) => {
     const address = await Address.findOneAndUpdate(
       { _id: req.params.id, user: req.user.id },
       { isDefault: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json(address);
   } catch (err) {

@@ -89,7 +89,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
 // Update coupon
 router.put('/:id', protect, adminOnly, async (req, res) => {
   try {
-    const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
     res.json(coupon);
   } catch (err) {
     res.status(400).json({ message: err.message });

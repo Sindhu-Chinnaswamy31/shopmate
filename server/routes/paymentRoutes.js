@@ -67,7 +67,7 @@ router.post("/verify", protect, async (req, res) => {
     const order = await Order.findByIdAndUpdate(
       dbOrderId,
       { razorpayPaymentId, status: "paid" },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     await Notification.create({
@@ -138,7 +138,8 @@ router.post('/create-order', protect, async (req, res) => {
     if (couponCode) {
       await Coupon.findOneAndUpdate(
         { code: couponCode.toUpperCase() },
-        { $inc: { usedCount: 1 } }
+        { $inc: { usedCount: 1 } },
+        { returnDocument: 'after' }
       );
     }
 
