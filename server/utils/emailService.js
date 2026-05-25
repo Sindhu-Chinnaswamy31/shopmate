@@ -9,7 +9,8 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS   // must be an App Password
   },
-  family: 4
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
 });
 
 // ── ORDER CONFIRMATION ──────────────────────────
