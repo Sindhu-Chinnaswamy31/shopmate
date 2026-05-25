@@ -8,8 +8,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-console.log('Email transporter configured with user:', process.env.FRONTEND_URL);
-
 // ── ORDER CONFIRMATION ──────────────────────────
 const sendOrderConfirmation = async (userEmail, userName, order) => {
   const itemsHTML = order.items.map(item => `
