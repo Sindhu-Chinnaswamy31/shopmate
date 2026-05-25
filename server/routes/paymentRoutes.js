@@ -7,6 +7,7 @@ const { protect } = require("../middleware/authMiddleware");
 const { sendOrderConfirmation } = require("../utils/emailService");
 const User = require("../models/User");
 const Coupon = require('../models/Coupon');
+const Notification = require('../models/Notification');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -68,6 +69,17 @@ router.post("/verify", protect, async (req, res) => {
       { razorpayPaymentId, status: "paid" },
       { new: true }
     );
+
+    await Notification.create({
+      user: req.user.id,
+      title: "✅ Order Placed Successfully!",
+      message: `Your order #${order._id
+        .toString()
+        .slice(-6)
+        .toUpperCase()} has been placed. Total: ₹${order.totalAmount}`,
+      type: "order",
+      link: "/orders",
+    });
 
     // Decrease stock
     const Product = require("../models/Product");

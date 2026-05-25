@@ -5,6 +5,7 @@ const Order = require("../models/Order");
 const User = require("../models/User");
 const { protect } = require("../middleware/authMiddleware");
 const { adminOnly } = require("../middleware/adminMiddleware");
+const Notification = require('../models/Notification');
 
 // All admin routes are protected + admin only
 router.use(protect, adminOnly);
@@ -176,6 +177,38 @@ router.get("/users", async (req, res) => {
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+router.put('/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+
+    // Send notification to user
+    const statusMessages = {
+      shipped: { title: '🚚 Order Shipped!', msg: `Your order #${order._id.toString().slice(-6).toUpperCase()} has been shipped!` },
+      delivered: { title: '📦 Order Delivered!', msg: `Your order #${order._id.toString().slice(-6).toUpperCase()} has been delivered!` },
+      paid: { title: '✅ Payment Confirmed!', msg: `Payment for order #${order._id.toString().slice(-6).toUpperCase()} confirmed!` },
+      failed: { title: '❌ Order Failed', msg: `Your order #${order._id.toString().slice(-6).toUpperCase()} has failed.` },
+    };
+
+    if (statusMessages[req.body.status]) {
+      await Notification.create({
+        user: order.user,
+        title: statusMessages[req.body.status].title,
+        message: statusMessages[req.body.status].msg,
+        type: 'order',
+        link: '/orders'
+      });
+    }
+
+    res.json(order);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 

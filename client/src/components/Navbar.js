@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import NotificationBell from './NotificationBell';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -46,6 +47,8 @@ function Navbar() {
               )}
             </Link>
           )}
+
+          {user && user.role !== "admin" && <NotificationBell />}
 
           {user?.role === "admin" && (
             <div className="flex items-center gap-2">

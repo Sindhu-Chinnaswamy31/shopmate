@@ -31,6 +31,7 @@ import {
   adminUpdateCoupon,
   adminDeleteCoupon,
 } from "../services/api";
+import { broadcastNotification } from "../services/api";
 
 function ProductForm({
   form,
@@ -121,6 +122,13 @@ function AdminPanel() {
     usageLimit: "",
     expiryDate: "",
   });
+  const [broadcastForm, setBroadcastForm] = useState({
+    title: "",
+    message: "",
+    type: "offer",
+    link: "",
+  });
+  const [broadcasting, setBroadcasting] = useState(false);
 
   const loadCoupons = async () => {
     const res = await adminGetCoupons();
@@ -363,6 +371,7 @@ function AdminPanel() {
             { id: "orders", icon: "🧾", label: "Orders" },
             { id: "users", icon: "👥", label: "Users" },
             { id: "coupons", icon: "🏷️", label: "Coupons" },
+            { id: "notifications", icon: "🔔", label: "Notifications" },
             { id: "support", icon: "💬", label: "Support Chat" },
           ].map((tab) => (
             <button
@@ -1081,6 +1090,131 @@ function AdminPanel() {
                   <p>No coupons yet. Create your first one!</p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+        {activeTab === "notifications" && (
+          <div className="max-w-2xl">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">
+              🔔 Send Notification
+            </h1>
+
+            <div className="bg-white rounded-2xl shadow p-6">
+              <h3 className="font-bold text-gray-800 mb-4">
+                📢 Broadcast to All Users
+              </h3>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!broadcastForm.title || !broadcastForm.message) {
+                    toast.error("Title and message are required");
+                    return;
+                  }
+                  setBroadcasting(true);
+                  try {
+                    const res = await broadcastNotification(broadcastForm);
+                    toast.success(res.data.message);
+                    setBroadcastForm({
+                      title: "",
+                      message: "",
+                      type: "offer",
+                      link: "",
+                    });
+                  } catch (err) {
+                    toast.error("Failed to send notification");
+                  } finally {
+                    setBroadcasting(false);
+                  }
+                }}
+                className="flex flex-col gap-4"
+              >
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Notification Type
+                  </label>
+                  <select
+                    value={broadcastForm.type}
+                    onChange={(e) =>
+                      setBroadcastForm({
+                        ...broadcastForm,
+                        type: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  >
+                    <option value="offer">🏷️ Sale/Offer</option>
+                    <option value="stock">⚠️ Stock Alert</option>
+                    <option value="system">🔔 System</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 🎉 Big Sale Today!"
+                    value={broadcastForm.title}
+                    onChange={(e) =>
+                      setBroadcastForm({
+                        ...broadcastForm,
+                        title: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Message
+                  </label>
+                  <textarea
+                    placeholder="e.g. Get 20% off on all electronics today only!"
+                    value={broadcastForm.message}
+                    onChange={(e) =>
+                      setBroadcastForm({
+                        ...broadcastForm,
+                        message: e.target.value,
+                      })
+                    }
+                    rows={3}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2
+              focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Link (optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. / or /product/123"
+                    value={broadcastForm.link}
+                    onChange={(e) =>
+                      setBroadcastForm({
+                        ...broadcastForm,
+                        link: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={broadcasting}
+                  className="bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700
+            transition font-semibold disabled:opacity-60"
+                >
+                  {broadcasting ? "📤 Sending..." : "📢 Send to All Users"}
+                </button>
+              </form>
             </div>
           </div>
         )}

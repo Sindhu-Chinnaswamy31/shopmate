@@ -43,6 +43,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const reviewRoutes = require('./routes/reviewRoutes');
 const couponRoutes = require('./routes/couponRoutes');
 const addressRoutes = require('./routes/addressRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 app.use('/api/coupons', couponRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
@@ -50,6 +51,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Root
 app.get("/", (req, res) => {

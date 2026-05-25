@@ -42,5 +42,10 @@ export const addAddress = (data) => API.post('/addresses', data);
 export const updateAddress = (id, data) => API.put(`/addresses/${id}`, data);
 export const deleteAddress = (id) => API.delete(`/addresses/${id}`);
 export const setDefaultAddress = (id) => API.put(`/addresses/${id}/default`);
+export const getNotifications = () => API.get('/notifications');
+export const markAsRead = (id) => API.put(`/notifications/${id}/read`);
+export const markAllAsRead = () => API.put('/notifications/read-all');
+export const deleteNotification = (id) => API.delete(`/notifications/${id}`);
+export const broadcastNotification = (data) => API.post('/notifications/broadcast', data);
 
 export default API;
