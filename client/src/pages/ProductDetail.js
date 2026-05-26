@@ -94,7 +94,7 @@ function ProductDetail() {
     getRelatedProducts(id)
       .then((res) => setRelatedProducts(res.data))
       .catch(console.error);
-  }, [id]);
+  }, [addToRecentlyViewed,id]);
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import NotificationBell from "./NotificationBell";
 import { useTheme } from "../context/ThemeContext";
+import toast from 'react-hot-toast';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -13,12 +14,32 @@ function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/");
     setMenuOpen(false);
   };
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowInstall(false);
+      toast.success('ShopMate installed! 🎉');
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstall(true);
+    });
+  }, []);
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -136,7 +157,16 @@ function Navbar() {
               </Link>
             </div>
           )}
+          {showInstall && (
+            <button onClick={handleInstall}
+              className="bg-purple-600 text-white px-3 py-1 rounded-full
+                text-sm font-semibold hover:bg-purple-700 transition flex items-center gap-1">
+              📱 Install App
+            </button>
+          )}
         </div>
+
+
 
         {/* Mobile Right — Cart + Hamburger */}
         <div className="flex md:hidden items-center gap-3">
