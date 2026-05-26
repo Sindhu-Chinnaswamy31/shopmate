@@ -7,17 +7,20 @@ import { CartProvider } from "./context/CartContext";
 import { Toaster } from "react-hot-toast";
 import { WishlistProvider } from "./context/WishlistContext";
 import { RecentlyViewedProvider } from './context/RecentlyViewedContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <AuthProvider>
-    <CartProvider>
-      <WishlistProvider>
-        <RecentlyViewedProvider>
-          <App />
-          <Toaster position="top-right" />
-        </RecentlyViewedProvider>
-      </WishlistProvider>
-    </CartProvider>
-  </AuthProvider>
+  <ThemeProvider>
+    <AuthProvider>
+      <CartProvider>
+        <WishlistProvider>
+          <RecentlyViewedProvider>
+            <App />
+            <Toaster position="top-right" />
+          </RecentlyViewedProvider>
+        </WishlistProvider>
+      </CartProvider>
+    </AuthProvider>
+  </ThemeProvider>
 );

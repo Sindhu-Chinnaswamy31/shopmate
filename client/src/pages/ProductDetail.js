@@ -384,7 +384,7 @@ function ProductDetail() {
       <div className="mt-10">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
               Customer Reviews
             </h2>
             <div className="flex items-center gap-2 mt-1">

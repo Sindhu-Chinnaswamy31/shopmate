@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
-import NotificationBell from './NotificationBell';
+import NotificationBell from "./NotificationBell";
+import { useTheme } from "../context/ThemeContext";
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -11,6 +12,7 @@ function Navbar() {
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
@@ -104,6 +106,13 @@ function Navbar() {
                   {user.name}
                 </span>
               </Link>
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full hover:bg-purple-50 transition text-xl"
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDark ? "☀️" : "🌙"}
+              </button>
               <button
                 onClick={handleLogout}
                 className="text-sm text-red-500 hover:text-red-700 font-medium transition"

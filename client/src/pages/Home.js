@@ -118,7 +118,7 @@ function Home() {
     );
 
   return (
-    <div>
+    <div className="dark:bg-gray-900 min-h-screen">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-purple-700 to-indigo-700 text-white py-12 sm:py-20 px-4 sm:px-8">
         <div className="max-w-4xl mx-auto text-center">
@@ -407,7 +407,7 @@ function ProductCard({ product }) {
     product.image || (product.images && product.images[0]) || null;
 
   return (
-    <div className="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 overflow-hidden group">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow hover:shadow-xl transition-all duration-300 overflow-hidden group">
         <div
           onClick={() => navigate(`/product/${product._id}`)}
           className="cursor-pointer"
@@ -466,10 +466,10 @@ function ProductCard({ product }) {
               ({product.numReviews || 0})
             </span>
           </div>
-          <h3 className="font-semibold text-gray-800 mt-1 text-base leading-snug hover:text-purple-600 transition">
+          <h3 className="font-semibold text-gray-800 mt-1 dark:text-white text-base leading-snug hover:text-purple-600 transition">
             {product.name}
           </h3>
-          <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+          <p className="text-gray-400 text-sm mt-1 line-clamp-2 dark:text-white">
             {product.description}
           </p>
         </div>
