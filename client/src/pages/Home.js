@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import toast from "react-hot-toast";
 import StarRating from "../components/StarRating";
+import { useRecentlyViewed } from "../context/RecentlyViewedContext";
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -16,6 +17,7 @@ function Home() {
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [inStockOnly, setInStockOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const { recentlyViewed, clearRecentlyViewed } = useRecentlyViewed();
 
   const categories = [
     "All",
@@ -366,6 +368,27 @@ function Home() {
             {filtered.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
+          </div>
+        )}
+
+        {recentlyViewed.length > 0 && (
+          <div className="mt-12">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">
+                👁️ Recently Viewed
+              </h2>
+              <button
+                onClick={clearRecentlyViewed}
+                className="text-sm text-gray-400 hover:text-red-500 transition"
+              >
+                Clear all
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {recentlyViewed.slice(0, 6).map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
           </div>
         )}
       </div>

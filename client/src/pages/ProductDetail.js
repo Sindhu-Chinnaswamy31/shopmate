@@ -5,13 +5,14 @@ import {
   getReviews,
   addReview,
   deleteReview,
-  getRelatedProducts
+  getRelatedProducts,
 } from "../services/api";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 import StarRating from "../components/StarRating";
 import toast from "react-hot-toast";
+import { useRecentlyViewed } from "../context/RecentlyViewedContext";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -30,25 +31,11 @@ function ProductDetail() {
   const quantity = cartItem ? cartItem.quantity : 0;
   const [selectedImage, setSelectedImage] = useState(0);
   const allImages = product?.image
-  ? [product.image, ...(product.images || [])]
-  : product?.images || [];
+    ? [product.image, ...(product.images || [])]
+    : product?.images || [];
   const displayImages = allImages.length > 0 ? allImages : null;
   const [relatedProducts, setRelatedProducts] = useState([]);
-
-  useEffect(() => {
-  getProductById(id)
-    .then((res) => { setProduct(res.data); setLoading(false); })
-    .catch((err) => { console.error(err); setLoading(false); });
-
-  getReviews(id)
-    .then((res) => setReviews(res.data))
-    .catch((err) => console.error(err));
-
-  // ← Add this
-  getRelatedProducts(id)
-    .then((res) => setRelatedProducts(res.data))
-    .catch((err) => console.error(err));
-}, [id]);
+  const { addToRecentlyViewed } = useRecentlyViewed();
 
   useEffect(() => {
     getProductById(id)
@@ -64,6 +51,47 @@ function ProductDetail() {
     getReviews(id)
       .then((res) => setReviews(res.data))
       .catch((err) => console.error(err));
+
+    // ← Add this
+    getRelatedProducts(id)
+      .then((res) => setRelatedProducts(res.data))
+      .catch((err) => console.error(err));
+  }, [id]);
+
+  useEffect(() => {
+    getProductById(id)
+      .then((res) => {
+        setProduct(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+
+    getReviews(id)
+      .then((res) => setReviews(res.data))
+      .catch((err) => console.error(err));
+  }, [id]);
+
+  useEffect(() => {
+    getProductById(id)
+      .then((res) => {
+        setProduct(res.data);
+        setLoading(false);
+        addToRecentlyViewed(res.data); // ← add this
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+
+    getReviews(id)
+      .then((res) => setReviews(res.data))
+      .catch(console.error);
+    getRelatedProducts(id)
+      .then((res) => setRelatedProducts(res.data))
+      .catch(console.error);
   }, [id]);
 
   const handleSubmitReview = async (e) => {
@@ -449,7 +477,7 @@ function ProductDetail() {
             🔄 You May Also Like
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {relatedProducts.map(related => (
+            {relatedProducts.map((related) => (
               <RelatedProductCard key={related._id} product={related} />
             ))}
           </div>
@@ -462,10 +490,10 @@ function ProductDetail() {
 function RelatedProductCard({ product }) {
   const navigate = useNavigate();
   const { addToCart, cartItems } = useCart();
-  const inCart = cartItems.find(item => item._id === product._id);
+  const inCart = cartItems.find((item) => item._id === product._id);
 
-  const productImage = product.image ||
-    (product.images && product.images[0]) || null;
+  const productImage =
+    product.image || (product.images && product.images[0]) || null;
 
   return (
     <div
@@ -473,24 +501,33 @@ function RelatedProductCard({ product }) {
         duration-300 overflow-hidden group cursor-pointer"
       onClick={() => {
         navigate(`/product/${product._id}`);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}>
-
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }}
+    >
       {/* Image */}
-      <div className="bg-gray-100 h-32 sm:h-40 flex items-center justify-center
-        overflow-hidden relative">
+      <div
+        className="bg-gray-100 h-32 sm:h-40 flex items-center justify-center
+        overflow-hidden relative"
+      >
         {productImage ? (
-          <img src={productImage} alt={product.name}
+          <img
+            src={productImage}
+            alt={product.name}
             className="h-full w-full object-cover group-hover:scale-105
-              transition-transform duration-300" />
+              transition-transform duration-300"
+          />
         ) : (
           <span className="text-4xl">🛍️</span>
         )}
         {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-black bg-opacity-40
-            flex items-center justify-center">
-            <span className="bg-red-500 text-white px-2 py-0.5
-              rounded-full text-xs font-semibold">
+          <div
+            className="absolute inset-0 bg-black bg-opacity-40
+            flex items-center justify-center"
+          >
+            <span
+              className="bg-red-500 text-white px-2 py-0.5
+              rounded-full text-xs font-semibold"
+            >
               Out of Stock
             </span>
           </div>
@@ -499,12 +536,16 @@ function RelatedProductCard({ product }) {
 
       {/* Details */}
       <div className="p-3">
-        <span className="text-xs bg-purple-100 text-purple-600
-          px-2 py-0.5 rounded-full font-medium">
+        <span
+          className="text-xs bg-purple-100 text-purple-600
+          px-2 py-0.5 rounded-full font-medium"
+        >
           {product.category}
         </span>
-        <h3 className="font-semibold text-gray-800 mt-1 text-sm
-          leading-snug line-clamp-2 hover:text-purple-600 transition">
+        <h3
+          className="font-semibold text-gray-800 mt-1 text-sm
+          leading-snug line-clamp-2 hover:text-purple-600 transition"
+        >
           {product.name}
         </h3>
 
@@ -528,18 +569,25 @@ function RelatedProductCard({ product }) {
             e.stopPropagation();
             if (product.stock > 0) {
               addToCart(product);
-              toast.success('Added to cart! 🛒');
+              toast.success("Added to cart! 🛒");
             }
           }}
           disabled={product.stock <= 0}
           className={`mt-2 w-full py-1.5 rounded-xl text-xs font-semibold
             transition-all duration-300
-            ${inCart
-              ? 'bg-green-500 text-white'
-              : product.stock <= 0
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-purple-600 text-white hover:bg-purple-700'}`}>
-          {inCart ? '✓ In Cart' : product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+            ${
+              inCart
+                ? "bg-green-500 text-white"
+                : product.stock <= 0
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-purple-600 text-white hover:bg-purple-700"
+            }`}
+        >
+          {inCart
+            ? "✓ In Cart"
+            : product.stock <= 0
+            ? "Out of Stock"
+            : "Add to Cart"}
         </button>
       </div>
     </div>
