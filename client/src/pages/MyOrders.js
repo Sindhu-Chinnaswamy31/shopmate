@@ -2,6 +2,62 @@ import React, { useEffect, useState } from "react";
 import { getMyOrders } from "../services/api";
 import { Link } from "react-router-dom";
 
+function OrderTimeline({ status }) {
+  const steps = [
+    { key: 'pending', label: 'Order Placed', icon: '📋' },
+    { key: 'paid', label: 'Payment Done', icon: '💳' },
+    { key: 'shipped', label: 'Shipped', icon: '🚚' },
+    { key: 'delivered', label: 'Delivered', icon: '📦' },
+  ];
+
+  const statusOrder = ['pending', 'paid', 'shipped', 'delivered'];
+  const currentIndex = statusOrder.indexOf(status);
+  const isFailed = status === 'failed';
+
+  if (isFailed) return (
+    <div className="flex items-center gap-2 mt-3 text-red-500">
+      <span>❌</span>
+      <span className="text-sm font-semibold">Order Failed</span>
+    </div>
+  );
+
+  return (
+    <div className="mt-4">
+      <div className="flex items-center justify-between relative">
+        {/* Progress Line */}
+        <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 z-0">
+          <div
+            className="h-full bg-purple-600 transition-all duration-500"
+            style={{ width: `${(currentIndex / (steps.length - 1)) * 100}%` }}
+          />
+        </div>
+
+        {steps.map((step, index) => {
+          const isCompleted = index <= currentIndex;
+          const isCurrent = index === currentIndex;
+          return (
+            <div key={step.key}
+              className="flex flex-col items-center z-10 relative">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center
+                text-lg border-2 transition-all duration-300
+                ${isCompleted
+                  ? 'bg-purple-600 border-purple-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-400'}
+                ${isCurrent ? 'ring-4 ring-purple-200 scale-110' : ''}`}>
+                {isCompleted ? (index < currentIndex ? '✓' : step.icon) : step.icon}
+              </div>
+              <p className={`text-xs mt-2 text-center font-medium max-w-16
+                ${isCompleted ? 'text-purple-600' : 'text-gray-400'}`}>
+                {step.label}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +188,8 @@ function MyOrders() {
                 </div>
               ))}
             </div>
+            
+            <OrderTimeline status={order.status} />
 
             {/* Order Footer */}
             <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
