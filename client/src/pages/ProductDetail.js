@@ -13,6 +13,7 @@ import { useAuth } from "../context/AuthContext";
 import StarRating from "../components/StarRating";
 import toast from "react-hot-toast";
 import { useRecentlyViewed } from "../context/RecentlyViewedContext";
+import { subscribeStockAlert } from '../services/api';
 
 function ProductDetail() {
   const { id } = useParams();
@@ -36,6 +37,7 @@ function ProductDetail() {
   const displayImages = allImages.length > 0 ? allImages : null;
   const [relatedProducts, setRelatedProducts] = useState([]);
   const { addToRecentlyViewed } = useRecentlyViewed();
+  const [alertSubscribed, setAlertSubscribed] = useState(false);
 
   useEffect(() => {
     getProductById(id)
@@ -351,6 +353,32 @@ function ProductDetail() {
           )}
         </div>
       </div>
+
+      {product.stock <= 0 && (
+        <div className="flex flex-col gap-3 ">
+          {user && !alertSubscribed && (
+            <button
+              onClick={async () => {
+                try {
+                  await subscribeStockAlert(product._id);
+                  setAlertSubscribed(true);
+                  toast.success('🔔 We will notify you when back in stock!');
+                } catch (err) {
+                  toast.error(err.response?.data?.message || 'Already subscribed!');
+                }
+              }}
+              className="w-full py-3 rounded-xl font-semibold border-2
+                border-purple-600 text-purple-600 hover:bg-purple-50 transition">
+              🔔 Notify When Back in Stock
+            </button>
+          )}
+          {alertSubscribed && (
+            <p className="text-center text-green-600 text-sm font-medium">
+              ✅ You'll be notified when back in stock!
+            </p>
+          )}
+        </div>
+      )}
 
       {/* ⭐ Reviews Section */}
       <div className="mt-10">

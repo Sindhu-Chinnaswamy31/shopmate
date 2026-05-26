@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const { protect } = require("../middleware/authMiddleware");
+const Notification = require('../models/Notification');
 
 // GET all products — PUBLIC (anyone can see products)
 router.get("/", async (req, res) => {
@@ -58,6 +59,27 @@ router.get('/:id/related', async (req, res) => {
     }).limit(6);
 
     res.json(related);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Subscribe to stock alert
+router.post('/:id/stock-alert', protect, async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+
+    if (product.stock > 0) {
+      return res.status(400).json({ message: 'Product is already in stock!' });
+    }
+
+    // Save alert (add stockAlerts array to product)
+    await Product.findByIdAndUpdate(req.params.id, {
+      $addToSet: { stockAlerts: req.user.id }
+    });
+
+    res.json({ message: 'You will be notified when this product is back in stock!' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

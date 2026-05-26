@@ -48,5 +48,6 @@ export const markAllAsRead = () => API.put('/notifications/read-all');
 export const deleteNotification = (id) => API.delete(`/notifications/${id}`);
 export const broadcastNotification = (data) => API.post('/notifications/broadcast', data);
 export const getRelatedProducts = (id) => API.get(`/products/${id}/related`);
+export const subscribeStockAlert = (id) => API.post(`/products/${id}/stock-alert`);
 
 export default API;

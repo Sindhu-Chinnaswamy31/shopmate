@@ -299,4 +299,33 @@ router.get('/export/users', async (req, res) => {
   }
 });
 
+router.put('/products/:id', async (req, res) => {
+  try {
+    const oldProduct = await Product.findById(req.params.id);
+    const product = await Product.findByIdAndUpdate(
+      req.params.id, req.body, { new: true }
+    );
+
+    // If product back in stock and had alerts
+    if (oldProduct.stock <= 0 && product.stock > 0 &&
+        oldProduct.stockAlerts?.length > 0) {
+      const notifications = oldProduct.stockAlerts.map(userId => ({
+        user: userId,
+        title: '🎉 Product Back in Stock!',
+        message: `${product.name} is back in stock! Grab it before it sells out.`,
+        type: 'stock',
+        link: `/product/${product._id}`
+      }));
+      await Notification.insertMany(notifications);
+
+      // Clear alerts after notifying
+      await Product.findByIdAndUpdate(req.params.id, { stockAlerts: [] });
+    }
+
+    res.json(product);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;

@@ -27,14 +27,15 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    rating: { 
-      type: Number, 
-      default: 0 
+    rating: {
+      type: Number,
+      default: 0,
     },
-    numReviews: { 
-      type: Number, 
-      default: 0 
+    numReviews: {
+      type: Number,
+      default: 0,
     },
+    stockAlerts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 ); // adds createdAt, updatedAt automatically
