@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { protect } = require('../middleware/authMiddleware');
+const crypto = require('crypto');
 
 // REGISTER
 router.post("/register", async (req, res) => {
@@ -127,6 +128,66 @@ router.put('/profile', protect, async (req, res) => {
     res.json({
       user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Forgot password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'No account with that email' });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpiry = Date.now() + 3600000; // 1 hour
+
+    await User.findByIdAndUpdate(user._id, {
+      resetPasswordToken: resetToken,
+      resetPasswordExpiry: resetExpiry
+    });
+
+    // Send email
+    const { sendPasswordReset } = require('../utils/emailService');
+    await sendPasswordReset(user.email, user.name, resetToken);
+
+    res.json({ message: 'Password reset link sent to your email!' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Reset password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(user._id, {
+      password: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpiry: null
+    });
+
+    res.json({ message: 'Password reset successful! Please login.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

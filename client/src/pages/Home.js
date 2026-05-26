@@ -408,11 +408,24 @@ function ProductCard({ product }) {
 
   return (
     <div className="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      <div
-        onClick={() => navigate(`/product/${product._id}`)}
-        className="cursor-pointer"
-      >
+        <div
+          onClick={() => navigate(`/product/${product._id}`)}
+          className="cursor-pointer"
+        >
         <div className="bg-gray-100 h-48 flex items-center justify-center overflow-hidden relative">
+          {product.label && (
+            <div className="absolute top-2 left-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-bold text-white
+                ${product.label === 'new' ? 'bg-blue-500' :
+                  product.label === 'sale' ? 'bg-red-500' :
+                  product.label === 'hot' ? 'bg-orange-500' :
+                  'bg-green-500'}`}>
+                {product.label === 'new' ? '🆕 NEW' :
+                product.label === 'sale' ? '🏷️ SALE' :
+                product.label === 'hot' ? '🔥 HOT' : '📈 TRENDING'}
+              </span>
+            </div>
+          )}
           {productImage ? (
             <img
               src={productImage}
@@ -464,9 +477,22 @@ function ProductCard({ product }) {
 
       <div className="p-4">
         <div className="flex justify-between items-center mt-1">
-          <p className="text-purple-600 font-bold text-xl">
+          {/* Show sale price if applicable */}
+          {product.label === 'sale' && product.salePrice ? (
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-purple-600 font-bold text-xl">
+                ₹{product.salePrice.toLocaleString()}
+              </p>
+              <p className="text-gray-400 text-sm line-through">
+                ₹{product.price.toLocaleString()}
+              </p>
+            </div>
+          ) : (
+            <p className="text-purple-600 font-bold text-xl">₹{product.price.toLocaleString()}</p>
+          )}
+          {/* <p className="text-purple-600 font-bold text-xl">
             ₹{product.price.toLocaleString()}
-          </p>
+          </p> */}
           <p
             className={`text-xs font-medium ${
               product.stock > 0 ? "text-green-500" : "text-red-500"

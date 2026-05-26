@@ -13,7 +13,9 @@ import AdminPanel from "./pages/AdminPanel";
 import MyOrders from "./pages/MyOrders";
 import SupportChat from "./pages/SupportChat";
 import Profile from "./pages/Profile";
-import Addresses from './pages/Addresses';
+import Addresses from "./pages/Addresses";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -80,6 +82,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
       <LiveChat />
     </Router>

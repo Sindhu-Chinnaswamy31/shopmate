@@ -36,6 +36,12 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
     stockAlerts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    label: {
+      type: String,
+      enum: ["new", "sale", "hot", "trending", null],
+      default: null,
+    },
+    salePrice: { type: Number, default: null },
   },
   { timestamps: true }
 ); // adds createdAt, updatedAt automatically

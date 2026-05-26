@@ -88,7 +88,40 @@ function ProductForm({
               </div>
             )
           )}
-
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Label (optional)
+            </label>
+            <select
+              name="label"
+              value={form.label || ""}
+              onChange={onChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
+            >
+              <option value="">No Label</option>
+              <option value="new">🆕 New</option>
+              <option value="sale">🏷️ Sale</option>
+              <option value="hot">🔥 Hot</option>
+              <option value="trending">📈 Trending</option>
+            </select>
+          </div>
+          {form.label === "sale" && (
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Sale Price (₹)
+              </label>
+              <input
+                type="number"
+                name="salePrice"
+                placeholder="Discounted price"
+                value={form.salePrice || ""}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2
+        focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+            </div>
+          )}
           {/* Main Image */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
@@ -186,14 +219,9 @@ function AdminPanel() {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [form, setForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "",
-    stock: "",
-    image: "",
-    images: [],
-  });
+  name: "", description: "", price: "", category: "",
+  stock: "", image: "", images: [], label: "", salePrice: ""
+});
   const [productErrors, setProductErrors] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [coupons, setCoupons] = useState([]);

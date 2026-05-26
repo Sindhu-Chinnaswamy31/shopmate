@@ -200,4 +200,43 @@ const sendOrderStatusUpdate = async (userEmail, userName, order, newStatus) => {
   });
 };
 
-module.exports = { sendOrderConfirmation, sendOrderStatusUpdate };
+const sendPasswordReset = async (userEmail, userName, token) => {
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+  try {
+    await resend.emails.send({
+      from: 'ShopMate <onboarding@resend.dev>',
+      to: userEmail,
+      subject: '🔐 Reset Your Password - ShopMate',
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+          <div style="background:linear-gradient(135deg,#7C3AED,#4F46E5);padding:40px;
+            text-align:center;border-radius:12px 12px 0 0;">
+            <h1 style="color:white;margin:0;">🛍️ ShopMate</h1>
+            <p style="color:#DDD6FE;margin:8px 0 0;">Password Reset Request</p>
+          </div>
+          <div style="background:#fff;padding:40px;border:1px solid #e5e7eb;">
+            <h2 style="color:#1f2937;">Hi ${userName}! 👋</h2>
+            <p style="color:#6b7280;">
+              We received a request to reset your password.
+              Click the button below to reset it.
+            </p>
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${resetUrl}"
+                style="background:#7C3AED;color:white;padding:14px 40px;
+                  border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
+                Reset My Password
+              </a>
+            </div>
+            <p style="color:#9ca3af;font-size:14px;">
+              This link expires in 1 hour. If you didn't request this, ignore this email.
+            </p>
+          </div>
+        </div>
+      `
+    });
+  } catch (err) {
+    console.error('Password reset email error:', err.message);
+  }
+};
+
+module.exports = { sendOrderConfirmation, sendOrderStatusUpdate, sendPasswordReset };
