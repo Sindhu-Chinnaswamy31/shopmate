@@ -45,4 +45,22 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// GET related products (same category, exclude current)
+router.get('/:id/related', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+
+    const related = await Product.find({
+      category: product.category,
+      _id: { $ne: req.params.id }, // exclude current product
+      stock: { $gt: 0 }            // only in stock
+    }).limit(6);
+
+    res.json(related);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

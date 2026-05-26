@@ -214,4 +214,89 @@ router.put('/orders/:id', async (req, res) => {
   }
 });
 
+// Export orders as CSV
+router.get('/export/orders', async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 });
+
+    // Build CSV
+    const headers = ['Order ID', 'Customer', 'Email', 'Items', 'Total', 'Status', 'Date'];
+    const rows = orders.map(o => [
+      o._id.toString().slice(-8).toUpperCase(),
+      o.user?.name || 'N/A',
+      o.user?.email || 'N/A',
+      o.items.map(i => `${i.name}(x${i.quantity})`).join(' | '),
+      o.totalAmount,
+      o.status,
+      new Date(o.createdAt).toLocaleDateString('en-IN')
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=shopmate-orders.csv');
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Export products as CSV
+router.get('/export/products', async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+
+    const headers = ['Product ID', 'Name', 'Category', 'Price', 'Stock', 'Rating', 'Reviews'];
+    const rows = products.map(p => [
+      p._id.toString().slice(-8).toUpperCase(),
+      p.name,
+      p.category,
+      p.price,
+      p.stock,
+      p.rating || 0,
+      p.numReviews || 0
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=shopmate-products.csv');
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Export users as CSV
+router.get('/export/users', async (req, res) => {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+
+    const headers = ['User ID', 'Name', 'Email', 'Role', 'Joined'];
+    const rows = users.map(u => [
+      u._id.toString().slice(-8).toUpperCase(),
+      u.name,
+      u.email,
+      u.role,
+      new Date(u.createdAt).toLocaleDateString('en-IN')
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=shopmate-users.csv');
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
