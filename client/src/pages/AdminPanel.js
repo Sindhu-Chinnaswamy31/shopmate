@@ -33,55 +33,101 @@ import {
 } from "../services/api";
 import { broadcastNotification } from "../services/api";
 
-function ProductForm({
-  form,
-  onSubmit,
-  onCancel,
-  onChange,
-  title,
-  errors = {},
-}) {
+function ProductForm({ form, onSubmit, onCancel, onChange, onImagesChange, title, errors = {} }) {
+  const [imageInput, setImageInput] = useState('');
+
+  const addImage = () => {
+    if (!imageInput.trim()) return;
+    const current = form.images || [];
+    onImagesChange([...current, imageInput.trim()]);
+    setImageInput('');
+  };
+
+  const removeImage = (index) => {
+    const current = form.images || [];
+    onImagesChange(current.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-screen overflow-y-auto">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
         <h3 className="text-xl font-bold mb-6">{title}</h3>
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
-          {["name", "description", "price", "category", "stock", "image"].map(
-            (field) => (
-              <div key={field}>
-                <input
-                  type={["price", "stock"].includes(field) ? "number" : "text"}
-                  name={field}
-                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                  value={form[field]}
-                  onChange={onChange}
-                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2
-                  ${
-                    errors[field]
-                      ? "border-red-400 focus:ring-red-200"
-                      : "border-gray-300 focus:ring-purple-400"
-                  }`}
-                />
-                {errors[field] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    ⚠️ {errors[field]}
-                  </p>
-                )}
+          {["name", "description", "price", "category", "stock"].map((field) => (
+            <div key={field}>
+              <label className="text-sm font-medium text-gray-700 mb-1 block capitalize">{field}</label>
+              <input
+                type={["price", "stock"].includes(field) ? "number" : "text"}
+                name={field}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                value={form[field]}
+                onChange={onChange}
+                className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2
+                  ${errors[field] ? "border-red-400 focus:ring-red-200" : "border-gray-300 focus:ring-purple-400"}`}
+              />
+              {errors[field] && <p className="text-red-500 text-xs mt-1">⚠️ {errors[field]}</p>}
+            </div>
+          ))}
+
+          {/* Main Image */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Main Image URL</label>
+            <input
+              type="text" name="image"
+              placeholder="https://example.com/image.jpg"
+              value={form.image}
+              onChange={onChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            />
+          </div>
+
+          {/* Additional Images */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Additional Images ({(form.images || []).length} added)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Paste image URL and click Add"
+                value={imageInput}
+                onChange={(e) => setImageInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <button type="button" onClick={addImage}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm font-semibold">
+                Add
+              </button>
+            </div>
+
+            {/* Image previews */}
+            {(form.images || []).length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(form.images || []).map((img, index) => (
+                  <div key={index} className="relative group">
+                    <img src={img} alt={`img-${index}`}
+                      className="w-16 h-16 object-cover rounded-lg border border-gray-200" />
+                    <button type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full
+                        w-5 h-5 flex items-center justify-center text-xs
+                        opacity-0 group-hover:opacity-100 transition">
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
-            )
-          )}
+            )}
+          </div>
+
           <div className="flex gap-3 mt-2">
-            <button
-              type="submit"
-              className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 font-semibold"
-            >
+            <button type="submit"
+              className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 font-semibold">
               Save
             </button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50"
-            >
+            <button type="button" onClick={onCancel}
+              className="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
           </div>
@@ -108,6 +154,7 @@ function AdminPanel() {
     category: "",
     stock: "",
     image: "",
+    images: [],
   });
   const [productErrors, setProductErrors] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -129,6 +176,10 @@ function AdminPanel() {
     link: "",
   });
   const [broadcasting, setBroadcasting] = useState(false);
+
+  const handleImagesChange = (newImages) => {
+    setForm(prev => ({ ...prev, images: newImages }));
+  };
 
   const loadCoupons = async () => {
     const res = await adminGetCoupons();
@@ -684,6 +735,7 @@ function AdminPanel() {
                                 category: p.category,
                                 stock: p.stock,
                                 image: p.image || "",
+                                images: p.images || [], // ← add this
                               });
                             }}
                             className="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm hover:bg-blue-200 transition"
@@ -1226,6 +1278,7 @@ function AdminPanel() {
           form={form}
           onSubmit={handleAddProduct}
           onChange={handleFormChange}
+          onImagesChange={handleImagesChange}
           onCancel={() => {
             setShowAddProduct(false);
             setProductErrors({});
@@ -1239,6 +1292,7 @@ function AdminPanel() {
           form={form}
           onSubmit={handleEditProduct}
           onChange={handleFormChange}
+          onImagesChange={handleImagesChange}
           onCancel={() => {
             setEditProduct(null);
             setProductErrors({});

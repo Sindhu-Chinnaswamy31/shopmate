@@ -380,6 +380,8 @@ function ProductCard({ product }) {
   const navigate = useNavigate();
   const { toggleWishlist, isWishlisted } = useWishlist();
   const wishlisted = isWishlisted(product._id);
+  const productImage =
+    product.image || (product.images && product.images[0]) || null;
 
   return (
     <div className="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 overflow-hidden group">
@@ -388,9 +390,9 @@ function ProductCard({ product }) {
         className="cursor-pointer"
       >
         <div className="bg-gray-100 h-48 flex items-center justify-center overflow-hidden relative">
-          {product.image ? (
+          {productImage ? (
             <img
-              src={product.image}
+              src={productImage}
               alt={product.name}
               className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
